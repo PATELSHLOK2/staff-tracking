@@ -13,6 +13,8 @@ import Leave from './pages/Leave';
 import Tasks from './pages/Tasks';
 import Reports from './pages/Reports';
 import Communication from './pages/Communication';
+import Kiosk from './pages/Kiosk';
+import Settings from './pages/Settings';
 
 // Layout wrapper that shows the sidebar + renders child routes via <Outlet>
 function ProtectedLayout() {
@@ -74,12 +76,14 @@ function AppRoutes() {
         <Route path="/leaves" element={<Leave />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/communication" element={<Communication />} />
+        <Route path="/kiosk" element={<Kiosk />} />
 
         {/* Manager-only sub-routes */}
         <Route element={<ManagerRoute />}>
           <Route path="/staff" element={<Staff />} />
           <Route path="/tracking" element={<Tracking />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
 

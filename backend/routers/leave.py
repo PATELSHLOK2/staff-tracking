@@ -6,6 +6,7 @@ from datetime import date, datetime
 from database import get_db
 import models
 import auth
+from utils import get_ist_now, get_ist_today
 
 router = APIRouter(prefix="/leaves", tags=["leaves"])
 
@@ -85,7 +86,7 @@ def review_leave(leave_id: int, data: LeaveReview, db: Session = Depends(get_db)
     leave.status = data.status
     leave.manager_note = data.manager_note
     leave.reviewed_by = manager.id
-    leave.reviewed_at = datetime.utcnow()
+    leave.reviewed_at = get_ist_now()
     
     # Deduct leave balance if approved
     if data.status == "approved":

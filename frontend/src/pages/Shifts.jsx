@@ -19,7 +19,10 @@ function getWeekStart(date = new Date()) {
 }
 
 function formatDate(d) {
-    return d.toISOString().split('T')[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function addDays(date, days) {
@@ -123,7 +126,7 @@ export default function Shifts() {
                                         <tr>
                                             <th style={{ minWidth: 160 }}>Staff Member</th>
                                             {weekDays.map((d, i) => (
-                                                <th key={i} style={{ textAlign: 'center', minWidth: 100, background: isToday(d) ? 'rgba(245,158,11,0.1)' : '' }}>
+                                                <th key={i} style={{ textAlign: 'center', minWidth: 100, background: isToday(d) ? 'rgba(59,130,246,0.1)' : '' }}>
                                                     <div>{dayNames[i]}</div>
                                                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.getDate()}/{d.getMonth() + 1}</div>
                                                 </th>
@@ -148,7 +151,7 @@ export default function Shifts() {
                                                     const shift = getShiftForUserDay(s.id, d);
                                                     const cfg = shift && !shift.is_off ? SHIFTS_CONFIG[shift.shift_name] : null;
                                                     return (
-                                                        <td key={di} style={{ textAlign: 'center', background: isToday(d) ? 'rgba(245,158,11,0.05)' : '' }}>
+                                                        <td key={di} style={{ textAlign: 'center', background: isToday(d) ? 'rgba(59,130,246,0.05)' : '' }}>
                                                             <div
                                                                 onClick={() => { setForm({ user_id: s.id, shift_name: shift?.shift_name || s.shift, is_off: shift?.is_off || false }); setShowModal({ date: d }); }}
                                                                 style={{
@@ -183,7 +186,7 @@ export default function Shifts() {
                                         <div key={i} className="card" style={{
                                             borderLeft: `4px solid ${shift?.is_off ? 'var(--border)' : cfg ? cfg.color : 'var(--border)'}`,
                                             padding: '14px 18px',
-                                            background: isToday(d) ? 'rgba(245,158,11,0.03)' : '',
+                                            background: isToday(d) ? 'rgba(59,130,246,0.03)' : '',
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
                                         }}>
                                             <div>

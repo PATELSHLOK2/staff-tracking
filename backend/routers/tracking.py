@@ -5,6 +5,7 @@ from database import get_db
 import models
 import auth
 from datetime import datetime
+from utils import get_ist_now, get_ist_today
 
 router = APIRouter(prefix="/tracking", tags=["tracking"])
 
@@ -12,10 +13,6 @@ class LocationUpdate(BaseModel):
     lat: float
     lng: float
     accuracy: float = 0
-
-PUMP_LAT = 28.6139  # Default petrol pump location (can be configured)
-PUMP_LNG = 77.2090
-GEOFENCE_RADIUS_KM = 0.5
 
 def haversine_km(lat1, lng1, lat2, lng2):
     import math
@@ -41,15 +38,23 @@ def loc_to_dict(l: models.GpsLocation, db: Session):
 
 @router.post("/update")
 def update_location(data: LocationUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    dist = haversine_km(data.lat, data.lng, PUMP_LAT, PUMP_LNG)
-    is_in_zone = dist <= GEOFENCE_RADIUS_KM
+    config = db.query(models.AppConfig).first()
+    if not config:
+        config = models.AppConfig(pump_lat=28.6139, pump_lng=77.2090, geofence_radius=200)
+        
+    dist = haversine_km(data.lat, data.lng, config.pump_lat, config.pump_lng)
+    
+    # Configure radius from meters to km
+    geofence_km = config.geofence_radius / 1000.0
+    is_in_zone = dist <= geofence_km
+    
     loc = models.GpsLocation(
         user_id=current_user.id,
         lat=data.lat,
         lng=data.lng,
         accuracy=data.accuracy,
         is_in_zone=is_in_zone,
-        timestamp=datetime.utcnow(),
+        timestamp=get_ist_now(),
     )
     db.add(loc)
     db.commit()

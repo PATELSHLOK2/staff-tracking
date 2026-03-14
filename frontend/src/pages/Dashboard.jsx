@@ -65,7 +65,7 @@ export default function Dashboard() {
                     <h1>👋 Welcome, {user?.name?.split(' ')[0]}!</h1>
                     <p className="subtitle">{new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
-                <div className="badge" style={{ background: 'var(--warning-bg)', color: 'var(--warning)', border: '1px solid rgba(245,158,11,0.3)', padding: '6px 14px' }}>
+                <div className="badge" style={{ background: 'var(--primary-light)', color: 'var(--primary-dark)', border: '1px solid rgba(59,130,246,0.3)', padding: '6px 14px' }}>
                     {isManager ? '👑 Manager' : `⛽ ${user?.shift} Shift`}
                 </div>
             </div>
@@ -76,7 +76,7 @@ export default function Dashboard() {
                     <div className="stats-grid">
                         <StatCard label="Total Staff" value={stats.total_staff} icon={Users} color="#0ea5e9" bg="rgba(14,165,233,0.1)" />
                         <StatCard label="Present Today" value={stats.present_today} icon={CheckCircle} color="#22c55e" bg="rgba(34,197,94,0.1)" />
-                        <StatCard label="Checked In" value={stats.checked_in} icon={ClipboardCheck} color="#f59e0b" bg="rgba(245,158,11,0.1)" />
+                        <StatCard label="Checked In" value={stats.checked_in} icon={ClipboardCheck} color="#3b82f6" bg="rgba(59,130,246,0.1)" />
                         <StatCard label="Absent Today" value={stats.absent_today} icon={XCircle} color="#ef4444" bg="rgba(239,68,68,0.1)" />
                         <StatCard label="Pending Leaves" value={stats.pending_leaves} icon={AlertTriangle} color="#8b5cf6" bg="rgba(139,92,246,0.1)" />
                         <StatCard label="Pending Tasks" value={stats.pending_tasks} icon={FileText} color="#06b6d4" bg="rgba(6,182,212,0.1)" />
@@ -88,7 +88,7 @@ export default function Dashboard() {
                     <div className="stats-grid mb-4">
                         <StatCard label="Today's Status" value={todayAtt?.status || 'Not Checked In'} icon={ClipboardCheck} color="#22c55e" bg="rgba(34,197,94,0.1)" />
                         <StatCard label="Check In" value={todayAtt?.check_in ? new Date(todayAtt.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'} icon={Clock} color="#0ea5e9" bg="rgba(14,165,233,0.1)" />
-                        <StatCard label="Check Out" value={todayAtt?.check_out ? new Date(todayAtt.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'} icon={Clock} color="#f59e0b" bg="rgba(245,158,11,0.1)" />
+                        <StatCard label="Check Out" value={todayAtt?.check_out ? new Date(todayAtt.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'} icon={Clock} color="#8b5cf6" bg="rgba(139,92,246,0.1)" />
                         <StatCard label="My Tasks" value={myTasks.length} icon={FileText} color="#8b5cf6" bg="rgba(139,92,246,0.1)" />
                         <StatCard label="Leave Balance (Casual)" value={user?.casual_leave} icon={AlertTriangle} color="#22c55e" bg="rgba(34,197,94,0.1)" />
                     </div>

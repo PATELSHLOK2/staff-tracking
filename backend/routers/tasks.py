@@ -6,6 +6,7 @@ from datetime import date, datetime
 from database import get_db
 import models
 import auth
+from utils import get_ist_now, get_ist_today
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -73,7 +74,7 @@ def complete_task(task_id: int, db: Session = Depends(get_db), current_user: mod
     if task.assigned_to != current_user.id and current_user.role != "manager":
         raise HTTPException(status_code=403, detail="Not authorized")
     task.status = "completed"
-    task.completed_at = datetime.utcnow()
+    task.completed_at = get_ist_now()
     db.commit()
     db.refresh(task)
     return task_to_dict(task, db)
@@ -88,7 +89,7 @@ def update_task_status(task_id: int, data: TaskUpdate, db: Session = Depends(get
     if data.status:
         task.status = data.status
         if data.status == "completed":
-            task.completed_at = datetime.utcnow()
+            task.completed_at = get_ist_now()
     if data.priority and current_user.role == "manager":
         task.priority = data.priority
     db.commit()

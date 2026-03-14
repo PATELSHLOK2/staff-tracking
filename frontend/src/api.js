@@ -43,6 +43,7 @@ export const checkOut = (data) => api.post('/attendance/checkout', data);
 export const getTodayAttendance = () => api.get('/attendance/today');
 export const getMyHistory = () => api.get('/attendance/my-history');
 export const getAllAttendance = () => api.get('/attendance/all');
+export const kioskScan = (data) => api.post('/attendance/kiosk', data);
 
 // Shifts
 export const getWeekShifts = (weekStart) => api.get(`/shifts/week?week_start=${weekStart}`);
@@ -83,3 +84,7 @@ export const getLeaveSummary = (period) => api.get(`/reports/leave-summary?perio
 export const getPerformanceReport = (period) => api.get(`/reports/performance?period=${period}`);
 export const getDashboardStats = () => api.get('/reports/dashboard-stats');
 export const exportAttendanceCsv = (period) => `${API_BASE}/reports/export/attendance-csv?period=${period}`;
+
+// Settings
+export const getSettings = () => api.get('/settings/');
+export const updateSettings = (data) => api.put('/settings/', data);

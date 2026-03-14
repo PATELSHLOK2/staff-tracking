@@ -5,11 +5,12 @@ from database import get_db
 import models
 import auth
 import io
+from utils import get_ist_now, get_ist_today
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 def get_date_range(period: str):
-    today = date.today()
+    today = get_ist_today()
     if period == "daily":
         return today, today
     elif period == "weekly":
@@ -136,7 +137,7 @@ def export_attendance_csv(period: str = "monthly", db: Session = Depends(get_db)
 
 @router.get("/dashboard-stats")
 def dashboard_stats(db: Session = Depends(get_db), manager: models.User = Depends(auth.require_manager)):
-    today = date.today()
+    today = get_ist_today()
     total_staff = db.query(models.User).filter(models.User.is_active == True, models.User.role == "staff").count()
     today_records = db.query(models.AttendanceRecord).filter(models.AttendanceRecord.date == today).all()
     checked_in = sum(1 for r in today_records if r.check_in and not r.check_out)

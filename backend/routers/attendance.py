@@ -6,6 +6,7 @@ from datetime import datetime, date
 from database import get_db
 import models
 import auth
+from utils import get_ist_now, get_ist_today
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
 
@@ -17,6 +18,9 @@ class CheckInRequest(BaseModel):
 class CheckOutRequest(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
+
+class KioskScanRequest(BaseModel):
+    staff_id: int
 
 def record_to_dict(r: models.AttendanceRecord, user_name: str = ""):
     return {
@@ -36,7 +40,7 @@ def record_to_dict(r: models.AttendanceRecord, user_name: str = ""):
 
 @router.post("/checkin")
 def check_in(data: CheckInRequest, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    today = date.today()
+    today = get_ist_today()
     existing = db.query(models.AttendanceRecord).filter(
         models.AttendanceRecord.user_id == current_user.id,
         models.AttendanceRecord.date == today
@@ -44,7 +48,7 @@ def check_in(data: CheckInRequest, db: Session = Depends(get_db), current_user: 
     if existing and existing.check_in:
         raise HTTPException(status_code=400, detail="Already checked in today")
     
-    now = datetime.utcnow()
+    now = get_ist_now()
     # Determine if late (after 9am for morning shift, etc.)
     hour = now.hour
     status = "present"
@@ -81,7 +85,7 @@ def check_in(data: CheckInRequest, db: Session = Depends(get_db), current_user: 
 
 @router.post("/checkout")
 def check_out(data: CheckOutRequest, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    today = date.today()
+    today = get_ist_today()
     record = db.query(models.AttendanceRecord).filter(
         models.AttendanceRecord.user_id == current_user.id,
         models.AttendanceRecord.date == today
@@ -90,16 +94,71 @@ def check_out(data: CheckOutRequest, db: Session = Depends(get_db), current_user
         raise HTTPException(status_code=400, detail="Not checked in yet")
     if record.check_out:
         raise HTTPException(status_code=400, detail="Already checked out today")
-    record.check_out = datetime.utcnow()
+    record.check_out = get_ist_now()
     record.check_out_lat = data.lat
     record.check_out_lng = data.lng
     db.commit()
     db.refresh(record)
     return record_to_dict(record, current_user.name)
 
+@router.post("/kiosk")
+def kiosk_scan(data: KioskScanRequest, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    target_user = db.query(models.User).filter(models.User.id == data.staff_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Staff not found")
+
+    today = get_ist_today()
+    existing = db.query(models.AttendanceRecord).filter(
+        models.AttendanceRecord.user_id == target_user.id,
+        models.AttendanceRecord.date == today
+    ).first()
+    
+    now = get_ist_now()
+
+    if existing and existing.check_in and not existing.check_out:
+        # Check out
+        existing.check_out = now
+        existing.notes = (existing.notes or "") + " [Kiosk Checkout]"
+        db.commit()
+        db.refresh(existing)
+        return {"action": "checkout", "record": record_to_dict(existing, target_user.name)}
+
+    if existing and existing.check_in and existing.check_out:
+        raise HTTPException(status_code=400, detail="Already completed shift today")
+
+    # Check in
+    hour = now.hour
+    status = "present"
+    if target_user.shift == "Morning" and hour >= 9:
+        status = "late"
+    elif target_user.shift == "Evening" and hour >= 15:
+        status = "late"
+    elif target_user.shift == "Night" and hour >= 23:
+        status = "late"
+    
+    if existing:
+        existing.check_in = now
+        existing.status = status
+        existing.notes = (existing.notes or "") + " [Kiosk Checkin]"
+        db.commit()
+        db.refresh(existing)
+        return {"action": "checkin", "record": record_to_dict(existing, target_user.name)}
+    
+    record = models.AttendanceRecord(
+        user_id=target_user.id,
+        date=today,
+        check_in=now,
+        status=status,
+        notes="[Kiosk Checkin]",
+    )
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+    return {"action": "checkin", "record": record_to_dict(record, target_user.name)}
+
 @router.get("/today")
 def today_attendance(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    today = date.today()
+    today = get_ist_today()
     if current_user.role == "manager":
         records = db.query(models.AttendanceRecord).filter(models.AttendanceRecord.date == today).all()
         result = []

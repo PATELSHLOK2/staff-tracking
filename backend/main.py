@@ -20,7 +20,8 @@ app.add_middleware(
 
 # Include all routers
 from routers import auth as auth_router
-from routers import staff, attendance, leave, tasks, communication, shifts, tracking, reports
+from routers import staff, attendance, leave, tasks, communication, shifts, tracking, reports, settings
+from utils import get_ist_now, get_ist_today
 
 app.include_router(auth_router.router)
 app.include_router(staff.router)
@@ -31,6 +32,7 @@ app.include_router(communication.router)
 app.include_router(shifts.router)
 app.include_router(tracking.router)
 app.include_router(reports.router)
+app.include_router(settings.router)
 
 @app.get("/")
 def root():
@@ -58,6 +60,7 @@ def seed_data():
             shift="Morning",
             department="Management",
             employee_id="MGR001",
+            is_active=True,
         )
         db.add(manager)
         
@@ -82,6 +85,7 @@ def seed_data():
                 shift=shift,
                 department=dept,
                 employee_id=emp_id,
+                is_active=True,
             )
             db.add(u)
         
@@ -104,7 +108,7 @@ def seed_data():
         # Seed tasks
         staff_list = db.query(models.User).filter(models.User.role == "staff").all()
         from datetime import date, timedelta
-        today = date.today()
+        today = get_ist_today()
         task_data = [
             (staff_list[0].id, "Check pump meter readings", "Record all meter readings and report to manager", "high"),
             (staff_list[1].id, "Stock inventory check", "Count and report current fuel stock levels", "medium"),
@@ -124,6 +128,17 @@ def seed_data():
             db.add(t)
         
         db.commit()
+        
+        # Seed default config
+        if db.query(models.AppConfig).count() == 0:
+            default_config = models.AppConfig(
+                pump_lat=28.6139,
+                pump_lng=77.2090,
+                geofence_radius=200
+            )
+            db.add(default_config)
+            db.commit()
+
         print("✅ Demo data seeded successfully!")
     except Exception as e:
         print(f"Seed error: {e}")

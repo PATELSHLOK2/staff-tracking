@@ -6,6 +6,7 @@ from datetime import date
 from database import get_db
 import models
 import auth
+from utils import get_ist_now, get_ist_today
 
 router = APIRouter(prefix="/shifts", tags=["shifts"])
 
@@ -46,7 +47,7 @@ def get_week_shifts(week_start: str, db: Session = Depends(get_db), current_user
 @router.get("/my")
 def my_shifts(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     from datetime import timedelta
-    today = date.today()
+    today = get_ist_today()
     start = today
     end = today + timedelta(days=14)
     shifts = db.query(models.Shift).filter(

@@ -30,6 +30,12 @@ export default function Reports() {
     const [perfData, setPerfData] = useState(null);
     const [leaveData, setLeaveData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     const load = async () => {
         setLoading(true);
@@ -81,7 +87,19 @@ export default function Reports() {
             <div className="page-header">
                 <div>
                     <h1>Reports & Analytics</h1>
-                    <p className="subtitle">Performance insights for your petrol pump</p>
+                    <p className="subtitle">
+                        {currentTime.toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata',
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true
+                        })}
+                    </p>
                 </div>
                 <div style={{ display: 'flex', gap: 10 }}>
                     <div style={{ display: 'flex', gap: 4, background: 'var(--bg-surface)', padding: 4, borderRadius: 8 }}>

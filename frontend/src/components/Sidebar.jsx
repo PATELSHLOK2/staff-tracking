@@ -1,9 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getSettings } from '../api';
 import { useAuth } from '../context/AuthContext';
 import {
     LayoutDashboard, Users, ClipboardCheck, Calendar,
     MapPin, FileText, BarChart3, MessageSquare, LogOut,
-    Fuel
+    Fuel, Maximize, Settings as SettingsIcon
 } from 'lucide-react';
 
 const managerNav = [
@@ -16,6 +18,7 @@ const managerNav = [
     { to: '/leaves', label: 'Leave Management', icon: Calendar },
     { to: '/reports', label: 'Reports', icon: BarChart3 },
     { to: '/communication', label: 'Communication', icon: MessageSquare },
+    { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
 const staffNav = [
@@ -39,12 +42,22 @@ export default function Sidebar() {
 
     const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
+    const [pumpName, setPumpName] = useState("Petrol Pump Staff Management");
+
+    useEffect(() => {
+        getSettings().then(res => {
+            if (res.data && res.data.pump_name) {
+                setPumpName(res.data.pump_name);
+            }
+        }).catch(err => console.error("Could not load pump name for sidebar", err));
+    }, []);
+
     return (
         <aside className="sidebar">
             <div className="sidebar-logo">
-                <div className="logo-icon"><Fuel size={22} color="#000" /></div>
+                <div className="logo-icon"><Fuel size={22} color="#fff" /></div>
                 <div className="logo-text">
-                    <h2>Gayatri Petroleum</h2>
+                    <h2>{pumpName}</h2>
                     <p>Staff Management</p>
                 </div>
             </div>
