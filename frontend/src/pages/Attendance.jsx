@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { checkIn, checkOut, getTodayAttendance, getAllAttendance, getMyHistory, getSettings } from '../api';
-import { Clock, MapPin, CheckCircle, LogOut, Camera, X } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Clock, MapPin, CheckCircle, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function StatusBadge({ status }) {
@@ -30,30 +29,6 @@ export default function Attendance() {
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('today');
     const [gpsStatus, setGpsStatus] = useState('');
-    const [showScanner, setShowScanner] = useState(false);
-
-    useEffect(() => {
-        if (!showScanner) return;
-
-        let scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
-
-        const onScanSuccess = async (decodedText) => {
-            scanner.clear();
-            setShowScanner(false);
-
-            if (!todayRecord?.check_in) {
-                await handleCheckIn(decodedText);
-            } else if (todayRecord?.check_in && !todayRecord?.check_out) {
-                await handleCheckOut(decodedText);
-            }
-        };
-
-        scanner.render(onScanSuccess, (err) => { });
-
-        return () => {
-            scanner.clear().catch(error => console.error("Failed to clear scanner", error));
-        };
-    }, [showScanner, todayRecord]);
 
     const load = async () => {
         setLoading(true);
@@ -88,7 +63,7 @@ export default function Attendance() {
         );
     });
 
-    const handleCheckIn = async (qrData) => {
+    const handleCheckIn = async () => {
         const { lat, lng } = await getGPS();
         if (lat && lng && appConfig) {
             const dist = getDistance(lat, lng, appConfig.pump_lat, appConfig.pump_lng);
@@ -105,9 +80,8 @@ export default function Attendance() {
             return;
         }
 
-        const notes = typeof qrData === 'string' && qrData ? `Scanned QR: ${qrData}` : "";
         try {
-            const res = await checkIn({ lat, lng, notes });
+            const res = await checkIn({ lat, lng, notes: "" });
             setTodayRecord(res.data);
             toast.success('✅ Checked in successfully!');
         } catch (err) {
@@ -115,7 +89,7 @@ export default function Attendance() {
         }
     };
 
-    const handleCheckOut = async (qrData) => {
+    const handleCheckOut = async () => {
         const { lat, lng } = await getGPS();
         if (lat && lng && appConfig) {
             const dist = getDistance(lat, lng, appConfig.pump_lat, appConfig.pump_lng);
@@ -134,9 +108,6 @@ export default function Attendance() {
 
         try {
             const res = await checkOut({ lat, lng });
-            if (typeof qrData === 'string' && qrData) {
-                toast.success(`👋 Scanned checkout QR.`);
-            }
             setTodayRecord(res.data);
             toast.success('👋 Checked out successfully!');
         } catch (err) {
@@ -208,11 +179,6 @@ export default function Attendance() {
                                 {gpsStatus && <p style={{ color: 'var(--info)', fontSize: 13, marginTop: 8 }}>{gpsStatus}</p>}
                             </div>
                             <div style={{ display: 'flex', gap: 12 }}>
-                                {(!todayRecord?.check_in || (!todayRecord?.check_out && todayRecord?.check_in)) && (
-                                    <button className="btn btn-secondary" onClick={() => setShowScanner(true)} style={{ padding: '12px 24px', fontSize: 15 }}>
-                                        <Camera size={18} /> Scan QR
-                                    </button>
-                                )}
                                 {!todayRecord?.check_in && (
                                     <button className="btn btn-success" onClick={handleCheckIn} style={{ padding: '12px 24px', fontSize: 15 }}>
                                         <CheckCircle size={18} /> Check In
@@ -279,21 +245,6 @@ export default function Attendance() {
                     </div>
                 )}
             </div>
-
-            {showScanner && (
-                <div className="modal-overlay" onClick={() => setShowScanner(false)}>
-                    <div className="modal" style={{ maxWidth: 400, padding: 20 }} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Scan QR Code</h2>
-                            <button className="modal-close" onClick={() => setShowScanner(false)}><X size={16} /></button>
-                        </div>
-                        <div id="reader" style={{ width: '100%', borderRadius: 8, overflow: 'hidden' }}></div>
-                        <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 12 }}>
-                            Point your camera at the station's QR code to mark your attendance.
-                        </p>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
