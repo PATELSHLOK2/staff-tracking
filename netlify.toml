@@ -1,0 +1,15 @@
+[build]
+  # The directory containing the unbuilt code
+  base = "frontend/"
+
+  # The command to run to build your site
+  command = "npm run build"
+
+  # The directory containing the built code
+  publish = "dist/"
+
+# Redirect rules for React Single Page Application (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
