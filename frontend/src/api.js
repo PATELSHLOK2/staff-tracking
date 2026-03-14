@@ -88,3 +88,9 @@ export const exportAttendanceCsv = (period) => `${API_BASE}/reports/export/atten
 // Settings
 export const getSettings = () => api.get('/settings/');
 export const updateSettings = (data) => api.put('/settings/', data);
+
+// Payroll
+export const getPayrollSummary = (month) => api.get(`/payroll/summary?month=${encodeURIComponent(month)}`);
+export const getSalarySheet = (month) => api.get(`/payroll/sheet?month=${encodeURIComponent(month)}`);
+export const updateSalaryRecord = (id, data) => api.put(`/payroll/${id}`, data);
+export const disburseSalaries = (month) => api.post('/payroll/disburse', { month });
