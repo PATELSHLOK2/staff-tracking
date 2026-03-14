@@ -14,6 +14,8 @@ import Tasks from './pages/Tasks';
 import Reports from './pages/Reports';
 import Communication from './pages/Communication';
 import Kiosk from './pages/Kiosk';
+import Biometrics from './pages/Biometrics';
+import Payroll from './pages/Payroll';
 import Settings from './pages/Settings';
 
 // Layout wrapper that shows the sidebar + renders child routes via <Outlet>
@@ -77,10 +79,12 @@ function AppRoutes() {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/communication" element={<Communication />} />
         <Route path="/kiosk" element={<Kiosk />} />
+        <Route path="/biometrics" element={<Biometrics />} />
 
         {/* Manager-only sub-routes */}
         <Route element={<ManagerRoute />}>
           <Route path="/staff" element={<Staff />} />
+          <Route path="/payroll" element={<Payroll />} />
           <Route path="/tracking" element={<Tracking />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
