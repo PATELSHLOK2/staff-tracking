@@ -20,7 +20,7 @@ app.add_middleware(
 
 # Include all routers
 from routers import auth as auth_router
-from routers import staff, attendance, leave, tasks, communication, shifts, tracking, reports, settings
+from routers import staff, attendance, leave, tasks, communication, shifts, tracking, reports, settings, payroll
 from utils import get_ist_now, get_ist_today
 
 app.include_router(auth_router.router)
@@ -33,6 +33,7 @@ app.include_router(shifts.router)
 app.include_router(tracking.router)
 app.include_router(reports.router)
 app.include_router(settings.router)
+app.include_router(payroll.router)
 
 @app.get("/")
 def root():
