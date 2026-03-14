@@ -131,3 +131,20 @@ class AppConfig(Base):
     pump_lng = Column(Float, nullable=False, default=77.2090)
     geofence_radius = Column(Integer, nullable=False, default=200)
     updated_at = Column(DateTime, default=get_ist_now, onupdate=get_ist_now)
+
+class SalaryRecord(Base):
+    __tablename__ = "salary_records"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    month = Column(String, nullable=False)  # e.g., "February 2026"
+    basic_pay = Column(Integer, default=15000)
+    allowances = Column(Integer, default=0)
+    overtime_hours = Column(Integer, default=0)
+    overtime_rate = Column(Integer, default=100) # Default ₹100/hr
+    overtime = Column(Integer, default=0)
+    deductions = Column(Integer, default=0)
+    status = Column(String, default="Pending")  # "Pending", "Paid"
+    payment_date = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=get_ist_now)
+
+    user = relationship("User", backref="salary_records")
